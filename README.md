@@ -29,3 +29,8 @@ PLAGIARISM IS NOT ACCEPTABLE. From the first commit through all production of do
 * Performance Measurement: Supplement the analysis above with run-time measurements of multiple iterations of the game or puzzles as discussed in class. Sample results from a run-time profiler is a good idea at least as part of the measurements.
 * If your team has more than one student, see that everyone makes substantial git commits. In addition, your README documentation should include a summary of how you shared the work.
 * Live in-class presentation & demonstration of your work.
+
+
+## Sources
+* https://en.wikipedia.org/wiki/Three_musketeers_(game)
+* https://github.com/jlaire/3M/tree/master/src
