@@ -283,12 +283,3 @@ class ThreeMusketeers:
                     break
 
         return best_score, (best_move, best_position)
-
-    def play_vs_comp(self):
-        pass
-
-    def play_vs_human(self):
-        pass
-
-    def play_vs_ai(self):
-        pass

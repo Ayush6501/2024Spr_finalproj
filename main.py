@@ -12,8 +12,6 @@ def select_difficulty():
     while True:
         try:
             diff = int(input("Enter your difficulty: "))
-
-            # Check if the input is 'yes'
             if isinstance(diff, int) and 1 <= diff <= 3:
                 print("Difficulty Chosen - " + str(diff))
                 break
@@ -26,7 +24,7 @@ def select_difficulty():
 
 
 def three_musketeers(char, diff):
-    game = ThreeMusketeers(char, diff)
+    game = ThreeMusketeersGPU(char, diff)
     game.get_musketeers()
     player = True
 
@@ -48,7 +46,7 @@ def three_musketeers(char, diff):
                 # for space, move in moves.items():
                 #     print('Space {}: {}'.format(space, move))
                 board = copy.deepcopy(game.board)
-                a, b = game.minimax(board, difficulty, False)
+                a, b = game.minimax(board, game.difficulty, False)
                 if b is None:
                     break
                 print('AI moves: {} to {}'.format(b[0], b[1]))
@@ -61,7 +59,7 @@ def three_musketeers(char, diff):
             moves = game.generate_valid_moves(player)
             if player:
                 board = copy.deepcopy(game.board)
-                a, b = game.minimax(board, difficulty, True)
+                a, b = game.minimax(board, game.difficulty, True)
                 if b is None:
                     break
                 print('AI moves: {} to {}'.format(b[1], b[0]))
