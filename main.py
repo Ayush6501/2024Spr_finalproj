@@ -49,6 +49,8 @@ def three_musketeers(char, diff):
                 #     print('Space {}: {}'.format(space, move))
                 board = copy.deepcopy(game.board)
                 a, b = game.minimax(board, difficulty, False)
+                if b is None:
+                    break
                 print('AI moves: {} to {}'.format(b[0], b[1]))
                 game.make_move(b[0], b[1], None, False)
             print()
@@ -60,6 +62,8 @@ def three_musketeers(char, diff):
             if player:
                 board = copy.deepcopy(game.board)
                 a, b = game.minimax(board, difficulty, True)
+                if b is None:
+                    break
                 print('AI moves: {} to {}'.format(b[1], b[0]))
                 game.make_move(b[1], b[0], None, True)
             else:
@@ -111,8 +115,10 @@ if __name__ == '__main__':
     if character == '1':
         difficulty = select_difficulty()
         print("You are playing as the Three Musketeers!")
+        print('Musketeers are denoted with a "M"')
         three_musketeers('M', difficulty)
     if character == '2':
         difficulty = select_difficulty()
         print("You are playing as Cardinal Richelieu!")
+        print("Cardinal's men are denoted with a 'S' and Milady de Winter is denoted with 'W'")
         three_musketeers('E', difficulty)
