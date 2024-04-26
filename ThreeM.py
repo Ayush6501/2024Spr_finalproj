@@ -83,10 +83,11 @@ class ThreeMusketeers:
                                     moves[(i, j)].append((i + offset[0], j + offset[1]))
                     elif self.board[i][j] == 'W':
                         w = (i, j)
-            for offset in extended_offsets:
-                if 0 <= w[0] + offset[0] < 5 and 0 <= w[1] + offset[1] < 5:
-                    if self.board[w[0] + offset[0]][w[1] + offset[1]] == ' ':
-                        moves[(w[0] + offset[0], w[1] + offset[1])].append((w[0], w[1]))
+            if w is not None:
+                for offset in extended_offsets:
+                    if 0 <= w[0] + offset[0] < 5 and 0 <= w[1] + offset[1] < 5:
+                        if self.board[w[0] + offset[0]][w[1] + offset[1]] == ' ':
+                            moves[(w[0] + offset[0], w[1] + offset[1])].append((w[0], w[1]))
 
         return moves
 
