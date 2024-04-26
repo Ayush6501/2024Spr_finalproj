@@ -1,4 +1,5 @@
 from ThreeM import ThreeMusketeers
+from ThreeMGPU import ThreeMusketeersGPU
 import copy
 from art import *
 
@@ -47,7 +48,7 @@ def three_musketeers(char, diff):
                 # for space, move in moves.items():
                 #     print('Space {}: {}'.format(space, move))
                 board = copy.deepcopy(game.board)
-                a, b = game.minimax(board, 2, False)
+                a, b = game.minimax(board, difficulty, False)
                 print('AI moves: {} to {}'.format(b[0], b[1]))
                 game.make_move(b[0], b[1], None, False)
             print()
@@ -58,9 +59,8 @@ def three_musketeers(char, diff):
             moves = game.generate_valid_moves(player)
             if player:
                 board = copy.deepcopy(game.board)
-                a, b = game.minimax(board, 2, True)
+                a, b = game.minimax(board, difficulty, True)
                 print('AI moves: {} to {}'.format(b[1], b[0]))
-                print(a, b)
                 game.make_move(b[1], b[0], None, True)
             else:
                 spaces = list(moves.keys())
@@ -69,6 +69,7 @@ def three_musketeers(char, diff):
                     print('Space {} {}: {}'.format(c, space, move))
                     c += 1
                 space_index = int(input("Enter the space you want to conquer: "))
+                print('Available Enemies: ' + str(moves[spaces[space_index-1]]))
                 enemy_index = int(input("Enter the enemy index(starting with 1) you want to conquer with: "))
                 print(spaces[space_index-1], moves[spaces[space_index-1]][enemy_index-1])
                 game.make_move(moves[spaces[space_index-1]][enemy_index-1], spaces[space_index-1], None, False)

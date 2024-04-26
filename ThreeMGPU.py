@@ -1,22 +1,19 @@
 from collections import defaultdict
+import concurrent.futures
+import torch
 
 
-class ThreeMusketeers:
+class ThreeMusketeersGPU:
     def __init__(self, opp, diff):
 
         self.opponent = opp
         self.difficulty = diff * 2
         self.player = 'M'
         self.board = [['W', 'S', 'S', 'S', 'M'],
-                      ['S', 'S', 'S', 'S', 'S'],
-                      ['S', 'S', 'M', 'S', 'S'],
-                      ['S', 'S', 'S', 'S', 'S'],
-                      ['M', 'S', 'S', 'S', 'S']]
-        self.debug_board = [['W', ' ', 'S', 'S', 'M'],
-                            ['S', ' ', 'S', ' ', 'S'],
-                            ['S', ' ', 'M', ' ', ' '],
-                            ['S', ' ', 'S', ' ', 'S'],
-                            ['M', 'S', 'S', ' ', ' ']]
+                                   ['S', 'S', 'S', 'S', 'S'],
+                                   ['S', 'S', 'M', 'S', 'S'],
+                                   ['S', 'S', 'S', 'S', 'S'],
+                                   ['M', 'S', 'S', 'S', 'S']]
         self.musketeers_position = defaultdict()
         self.winner = None
 
@@ -64,7 +61,6 @@ class ThreeMusketeers:
     def generate_valid_moves(self, player):
         moves = defaultdict(lambda: [])
         offsets = [(0, -1), (1, 0), (-1, 0), (0, 1)]
-        extended_offsets = [(0, -1), (1, 0), (-1, 0), (0, 1), (1, 1), (-1, -1), (-1, 1), (1, -1)]
         if player:
             for musketeer, move in self.musketeers_position.items():
                 pos = move
@@ -73,7 +69,6 @@ class ThreeMusketeers:
                         if self.board[pos[0] + offset[0]][pos[1] + offset[1]] in ['S', 'W']:
                             moves[musketeer].append((pos[0] + offset[0], pos[1] + offset[1]))
         else:
-            w = None
             for i in range(len(self.board)):
                 for j in range(len(self.board[0])):
                     if self.board[i][j] == ' ':
@@ -81,13 +76,6 @@ class ThreeMusketeers:
                             if 0 <= i + offset[0] < 5 and 0 <= j + offset[1] < 5:
                                 if self.board[i + offset[0]][j + offset[1]] not in ['M', ' ']:
                                     moves[(i, j)].append((i + offset[0], j + offset[1]))
-                    elif self.board[i][j] == 'W':
-                        w = (i, j)
-            for offset in extended_offsets:
-                if 0 <= w[0] + offset[0] < 5 and 0 <= w[1] + offset[1] < 5:
-                    if self.board[w[0] + offset[0]][w[1] + offset[1]] == ' ':
-                        moves[(w[0] + offset[0], w[1] + offset[1])].append((w[0], w[1]))
-
         return moves
 
     def make_move(self, src, dest, index, is_musketeer):
@@ -243,51 +231,54 @@ class ThreeMusketeers:
             A tuple containing the best score and the corresponding move.
         """
         # Check for terminal state (win or draw)
-        if not self.are_moves_available(board):
+        if not self.are_moves_available(board) or depth == 0:
             return self.evaluate(board, is_musketeer), None
 
-        # Base case: Reached maximum depth
-        if depth == 0:
-            return self.evaluate(board, is_musketeer), None
-
-        # Initialize variables
         best_score = float('-inf') if is_musketeer else float('inf')
         best_move = None
         best_position = None
 
         # Generate all valid moves for the current player
-        for pos, moves in self.generate_valid_moves_minimax(board, is_musketeer).items():
-            for move in moves:
-                # Simulate the move on a copy of the board
-                new_board = self.make_minimax_move(board, pos, move, is_musketeer)
+        move_tasks = []
+        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+            for pos, moves in self.generate_valid_moves_minimax(board, is_musketeer).items():
+                move_tasks.append(
+                    executor.submit(self.evaluate_moves, board, depth, is_musketeer, alpha, beta, pos, moves))
 
-                # Recursively evaluate the opponent's move
-                score, _ = self.minimax(new_board, depth - 1, not is_musketeer, alpha, beta)
-
-                # Update best move based on player and minimax logic
-                if is_musketeer:
-                    best_score = max(best_score, score)
-                    if score >= best_score:
-                        best_move = move
-                        best_position = pos
-                else:
-                    best_score = min(best_score, score)
-                    if score <= best_score:
-                        best_move = move
-                        best_position = pos
-
-                # Alpha-beta pruning
-                alpha = max(alpha, best_score) if is_musketeer else min(alpha, best_score)
+        for future in concurrent.futures.as_completed(move_tasks):
+            score, move = future.result()
+            if is_musketeer:
+                if score >= best_score:
+                    best_score = score
+                    best_move = move
+                    best_position = pos
+                alpha = max(alpha, best_score)
+                if beta <= alpha:
+                    break
+            else:
+                if score <= best_score:
+                    best_score = score
+                    best_move = move
+                    best_position = pos
+                beta = min(beta, best_score)
                 if beta <= alpha:
                     break
 
         return best_score, (best_move, best_position)
 
-    def play_vs_comp(self):
-        pass
-
-    def play_vs_human(self):
-        pass
-
-    def play_vs_ai(self):
-        pass
+    def evaluate_moves(self, board, depth, is_musketeer, alpha, beta, pos, moves):
+        best_score = float('-inf') if is_musketeer else float('inf')
+        best_move = None
+        for move in moves:
+            new_board = board.copy()  # create a deep copy
+            new_board = self.make_minimax_move(new_board, pos, move, is_musketeer)
+            score, _ = self.minimax(new_board, depth - 1, not is_musketeer, alpha, beta)
+            if is_musketeer:
+                best_score = max(best_score, score)
+                if score >= best_score:
+                    best_move = move
+            else:
+                best_score = min(best_score, score)
+                if score <= best_score:
+                    best_move = move
+        return best_score, best_move
