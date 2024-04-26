@@ -24,33 +24,70 @@ def select_difficulty():
     return diff
 
 
-def three_musketeers(opp):
-    game = ThreeMusketeers(opp)
+def three_musketeers(char, diff):
+    game = ThreeMusketeers(char, diff)
+    game.get_musketeers()
     player = True
 
-    while game.are_moves_available():
-        game.print_board()
-        moves = game.generate_valid_moves(player)
-        print('Following are the valid moves: ')
-        if player:
-            for musk, move in moves.items():
-                print('Musketeer {}: {}'.format(musk, move))
-            next_input_musk = int(input("Enter the number of the musketeer you would like to move: "))
-            next_input_index = int(input("Enter the index (starting from 1) of the musketeer you want to move: "))
-            game.move_musketeer('M', next_input_musk, next_input_index, moves)
-        else:
-            for space, move in moves.items():
-                print('Space {}: {}'.format(space, move))
-            board = copy.deepcopy(game.board)
-            a, b = game.minimax(board, 3, False)
-            print(a, b)
-            game.move_enemy(b[1], b[0])
+    if char == 'M':
+        while game.are_moves_available():
+            game.print_board()
+            moves = game.generate_valid_moves(player)
+            if player:
+                print('Following are the valid moves: ')
+                for musk, move in moves.items():
+                    print('Musketeer {}: {}'.format(musk, move))
+                next_input_musk = int(input("Enter the number of the musketeer you would like to move: "))
+                next_input_index = int(input("Enter the index (starting from 1) of the musketeer you want to move: "))
+                game.make_move(game.musketeers_position[next_input_musk],
+                               moves[next_input_musk][next_input_index - 1], next_input_musk,
+                               True)
+                print('Musketeer to {}'.format(moves[next_input_musk][next_input_index - 1]))
+            else:
+                # for space, move in moves.items():
+                #     print('Space {}: {}'.format(space, move))
+                board = copy.deepcopy(game.board)
+                a, b = game.minimax(board, 2, False)
+                print('AI moves: {} to {}'.format(b[0], b[1]))
+                game.make_move(b[0], b[1], None, False)
+            print()
+            player = not player
+    else:
+        while game.are_moves_available():
+            game.print_board()
+            moves = game.generate_valid_moves(player)
+            if player:
+                board = copy.deepcopy(game.board)
+                a, b = game.minimax(board, 2, True)
+                print('AI moves: {} to {}'.format(b[1], b[0]))
+                print(a, b)
+                game.make_move(b[1], b[0], None, True)
+            else:
+                spaces = list(moves.keys())
+                c = 1
+                for space, move in moves.items():
+                    print('Space {} {}: {}'.format(c, space, move))
+                    c += 1
+                space_index = int(input("Enter the space you want to conquer: "))
+                enemy_index = int(input("Enter the enemy index(starting with 1) you want to conquer with: "))
+                print(spaces[space_index-1], moves[spaces[space_index-1]][enemy_index-1])
+                game.make_move(moves[spaces[space_index-1]][enemy_index-1], spaces[space_index-1], None, False)
+            print()
+            player = not player
 
-        player = not player
     if game.did_enemy_win():
         print("Cardinal Richelieu's Men Won!")
+        if char == 'E':
+            tprint('You Won!')
+        else:
+            tprint('You Lose!')
     else:
         print('The Three Musketeers won')
+        if char == 'M':
+            tprint('You Won!')
+        else:
+            tprint('You Lose!')
+    return
 
 
 if __name__ == '__main__':
@@ -69,13 +106,12 @@ if __name__ == '__main__':
     tprint("Main Menu", font="small")
     print("1. Press 1 to play as d'Artagnan")
     print("2. Press 2 to play as Cardinal Richelieu")
-    player = input('Choose your player: ')
-    if player == '1':
+    character = input('Choose your player: ')
+    if character == '1':
         difficulty = select_difficulty()
-        print("You are playing as the Three Musketeers")
-        three_musketeers('M')
-    if player == '2':
-        if player == '1':
-            difficulty = select_difficulty()
-            print("You are playing as the Three Musketeers")
-            three_musketeers('E')
+        print("You are playing as the Three Musketeers!")
+        three_musketeers('M', difficulty)
+    if character == '2':
+        difficulty = select_difficulty()
+        print("You are playing as Cardinal Richelieu!")
+        three_musketeers('E', difficulty)

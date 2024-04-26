@@ -2,22 +2,26 @@ from collections import defaultdict
 
 
 class ThreeMusketeers:
-    def __init__(self, opp):
+    def __init__(self, opp, diff):
 
         self.opponent = opp
+        self.difficulty = diff * 2
         self.player = 'M'
         self.board = [['W', 'S', 'S', 'S', 'M'],
                       ['S', 'S', 'S', 'S', 'S'],
                       ['S', 'S', 'M', 'S', 'S'],
                       ['S', 'S', 'S', 'S', 'S'],
                       ['M', 'S', 'S', 'S', 'S']]
-        self.musketeers_position = defaultdict(lambda: [])
+        self.musketeers_position = defaultdict()
         self.winner = None
 
     def print_board(self):
+        c = 0
         print()
+        print('    0|   1|   2|   3|   4')
         for row in self.board:
-            print(row)
+            print(str(c) + ' ' + str(row))
+            c += 1
         print()
         return
 
@@ -26,7 +30,7 @@ class ThreeMusketeers:
         for i in range(len(self.board)):
             for j in range(len(self.board[0])):
                 if self.board[i][j] == 'M':
-                    self.musketeers_position[num].append((i, j))
+                    self.musketeers_position[num] = (i, j)
                     num += 1
 
     def is_winner(self):
@@ -35,9 +39,8 @@ class ThreeMusketeers:
     def are_moves_available(self, board=None):
         offsets = [(0, -1), (1, 0), (-1, 0), (0, 1)]
         if board is None:
-            self.get_musketeers()
             for _, musketeer in self.musketeers_position.items():
-                musk = musketeer[0]
+                musk = musketeer
                 for offset in offsets:
                     if 0 <= musk[0] + offset[0] < 5 and 0 <= musk[1] + offset[1] < 5:
                         if self.board[musk[0] + offset[0]][musk[1] + offset[1]] != ' ':
@@ -58,7 +61,7 @@ class ThreeMusketeers:
         offsets = [(0, -1), (1, 0), (-1, 0), (0, 1)]
         if player:
             for musketeer, move in self.musketeers_position.items():
-                pos = move[0]
+                pos = move
                 for offset in offsets:
                     if 0 <= pos[0] + offset[0] < 5 and 0 <= pos[1] + offset[1] < 5:
                         if self.board[pos[0] + offset[0]][pos[1] + offset[1]] in ['S', 'W']:
@@ -69,32 +72,27 @@ class ThreeMusketeers:
                     if self.board[i][j] == ' ':
                         for offset in offsets:
                             if 0 <= i + offset[0] < 5 and 0 <= j + offset[1] < 5:
-                                if self.board[i + offset[0]][j + offset[1]] != 'M':
+                                if self.board[i + offset[0]][j + offset[1]] not in ['M', ' ']:
                                     moves[(i, j)].append((i + offset[0], j + offset[1]))
         return moves
 
-    def move_musketeer(self, player, player_num, index, move):
-        next_move = move[player_num][index - 1]
-        print(next_move)
-        # Place M at the next move on the board
-        self.board[next_move[0]][next_move[1]] = player
-        # Replace the old M on the board with a blank space
-        old_position = self.musketeers_position[player_num][0]
-        self.board[old_position[0]][old_position[1]] = ' '
-        # update musketeers position
-        self.musketeers_position[player_num][0] = (next_move[0], next_move[1])
-        self.print_board()
-        return
-
-    def move_enemy(self, space, enemy):
-        self.board[space[0]][space[1]] = 'S'
-        self.board[enemy[0]][enemy[1]] = ' '
-        self.print_board()
-        return
+    def make_move(self, src, dest, index, is_musketeer):
+        if is_musketeer:
+            self.board[dest[0]][dest[1]] = 'M'
+            self.board[src[0]][src
+            [1]] = ' '
+            self.musketeers_position[index] = (dest[0], dest[1])
+        else:
+            if self.board[src[0]][src[1]] == 'W':
+                self.board[dest[0]][dest[1]] = 'W'
+                self.board[src[0]][src[1]] = ' '
+            else:
+                self.board[dest[0]][dest[1]] = 'S'
+                self.board[src[0]][src[1]] = ' '
 
     def did_enemy_win(self):
         pos = list(self.musketeers_position.values())
-        if (pos[0][0][0] == pos[1][0][0] == pos[2][0][0]) or (pos[0][0][1] == pos[1][0][1] == pos[2][0][1]):
+        if (pos[0][0] == pos[1][0] == pos[2][0]) or (pos[0][1] == pos[1][1] == pos[2][1]):
             return True
         return False
 
@@ -196,6 +194,8 @@ class ThreeMusketeers:
             # replace move with ' '
             board[move[0]][move[1]] = ' '
         return board
+
+
 
     def generate_valid_moves_minimax(self, board, player):
         moves = defaultdict(lambda: [])
