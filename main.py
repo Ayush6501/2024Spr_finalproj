@@ -4,7 +4,11 @@ import copy
 from art import *
 
 
-def select_difficulty():
+def select_difficulty() -> int:
+    """
+    Function to help the user select the difficulty or complexity of the tree.
+    :return:  User provided input for difficulty
+    """
     print('Select your difficulty: ')
     print('1 - Easy')
     print('2 - Medium')
@@ -23,10 +27,23 @@ def select_difficulty():
     return diff
 
 
-def three_musketeers(char, diff):
-    game = ThreeMusketeersGPU(char, diff)
+def three_musketeers(char: str, diff: int) -> None:
+    """
+    Driver function to play the game which calls the Main ThreeMusketeers class
+    :param char: Character chosen by the user
+    :param diff: Difficulty chosen by the user
+    :return: None
+
+    >>> three_musketeers(char='C', diff=3)
+    Invalid input. You can only play as Enemy or Musketeer
+    """
+    game = ThreeMusketeers(char, diff)
     game.get_musketeers()
     player = True
+
+    if char not in ['E', 'M']:
+        print('Invalid input. You can only play as Enemy or Musketeer')
+        return
 
     if char == 'M':
         while game.are_moves_available():
@@ -103,6 +120,7 @@ if __name__ == '__main__':
     print('3. The musketeers win if on their turn they cannot move due to there being no enemy pieces '
           'adjacent to any musketeer and they are not all on the same row or column')
     print('4. The enemy wins if it can force the three musketeers to be all on the same row or column. ')
+    print("5. New Character!!! Milady de Winter denoted as 'W' can move a space in any direction.")
     print()
     print()
 

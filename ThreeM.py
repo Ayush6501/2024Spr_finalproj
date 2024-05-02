@@ -2,25 +2,41 @@ from collections import defaultdict
 
 
 class ThreeMusketeers:
+    """
+    ThreeMusketeers Puzzle Workhorse class to implement all the moves and checks
+    """
     def __init__(self, opp, diff):
-
-        self.opponent = opp
-        self.difficulty = diff * 2
-        self.player = 'M'
-        self.board = [['W', 'S', 'S', 'S', 'M'],
+        self.user = opp     # The user's character, either musketeer or enemy
+        self.difficulty = diff * 2      # The depth of the tree
+        self.player = 'M'       # Player with the first move
+        self.board = [['W', 'S', 'S', 'S', 'M'],        # The game board
                       ['S', 'S', 'S', 'S', 'S'],
                       ['S', 'S', 'M', 'S', 'S'],
                       ['S', 'S', 'S', 'S', 'S'],
                       ['M', 'S', 'S', 'S', 'S']]
-        self.debug_board = [['W', ' ', 'S', 'S', 'M'],
+        self.debug_board = [['W', ' ', 'S', 'S', 'M'],          # A board to help with debugging
                             ['S', ' ', 'S', ' ', 'S'],
                             ['S', ' ', 'M', ' ', ' '],
                             ['S', ' ', 'S', ' ', 'S'],
                             ['M', 'S', 'S', ' ', ' ']]
-        self.musketeers_position = defaultdict()
-        self.winner = None
+        self.musketeers_position = defaultdict()        # Dictionary to track the musketeer's position
+        self.winner = None      # Variable to track the winner
 
-    def print_board(self):
+    def print_board(self) -> None:
+        """
+        Prints the game board
+        :return: None
+        >>> game = ThreeMusketeers('M', 1)
+        >>> game.print_board()
+        <BLANKLINE>
+            0|   1|   2|   3|   4
+        0 ['W', 'S', 'S', 'S', 'M']
+        1 ['S', 'S', 'S', 'S', 'S']
+        2 ['S', 'S', 'M', 'S', 'S']
+        3 ['S', 'S', 'S', 'S', 'S']
+        4 ['M', 'S', 'S', 'S', 'S']
+        <BLANKLINE>
+        """
         c = 0
         print()
         print('    0|   1|   2|   3|   4')
@@ -30,7 +46,15 @@ class ThreeMusketeers:
         print()
         return
 
-    def get_musketeers(self):
+    def get_musketeers(self) -> None:
+        """
+        Returns the musketeer's position on the board
+        :return: None
+        >>> game = ThreeMusketeers('M', 1)
+        >>> game.get_musketeers()
+        >>> print(game.musketeers_position)
+        defaultdict(None, {1: (0, 4), 2: (2, 2), 3: (4, 0)})
+        """
         num = 1
         for i in range(len(self.board)):
             for j in range(len(self.board[0])):
@@ -38,10 +62,16 @@ class ThreeMusketeers:
                     self.musketeers_position[num] = (i, j)
                     num += 1
 
-    def is_winner(self):
-        pass
-
     def are_moves_available(self, board=None):
+        """
+        Checks if the board has any available moves for the musketeers
+        :param board: if None the class board will be checked, else the dummy board will be checked (minimax)
+        :return: True if moves are available, else False
+        >>> game = ThreeMusketeers('M', 1)
+        >>> game.get_musketeers()
+        >>> game.are_moves_available()
+        True
+        """
         offsets = [(0, -1), (1, 0), (-1, 0), (0, 1)]
         if board is None:
             for _, musketeer in self.musketeers_position.items():
@@ -61,7 +91,12 @@ class ThreeMusketeers:
                                     return True
             return False
 
-    def generate_valid_moves(self, player):
+    def generate_valid_moves(self, player: str) -> dict:
+        """
+        Generates the valid moves for the musketeers as well as the enemy
+        :param player: Character to generate the moves for
+        :return: Moves as a dict
+        """
         moves = defaultdict(lambda: [])
         offsets = [(0, -1), (1, 0), (-1, 0), (0, 1)]
         extended_offsets = [(0, -1), (1, 0), (-1, 0), (0, 1), (1, 1), (-1, -1), (-1, 1), (1, -1)]
@@ -91,7 +126,15 @@ class ThreeMusketeers:
 
         return moves
 
-    def make_move(self, src, dest, index, is_musketeer):
+    def make_move(self, src: tuple, dest: tuple, index: int, is_musketeer: bool) -> None:
+        """
+        Makes a move on the board for both the characters
+        :param src: Source cell
+        :param dest: Destination cell
+        :param index: helper to change the index of the musketeer in the musketeers position dict
+        :param is_musketeer: Boolean value to indicate if the character is a musketeer or not
+        :return: None
+        """
         if is_musketeer:
             self.board[dest[0]][dest[1]] = 'M'
             self.board[src[0]][src
@@ -104,20 +147,25 @@ class ThreeMusketeers:
             else:
                 self.board[dest[0]][dest[1]] = 'S'
                 self.board[src[0]][src[1]] = ' '
+        return
 
-    def did_enemy_win(self):
+    def did_enemy_win(self) -> bool:
+        """
+        Checks if the enemy wins the game i.e., the musketeers have no available moves
+        :return: True if enemy wins, else False
+        """
         pos = list(self.musketeers_position.values())
         if (pos[0][0] == pos[1][0] == pos[2][0]) or (pos[0][1] == pos[1][1] == pos[2][1]):
             return True
         return False
 
-    def is_terminal(self):
-        if self.are_moves_available():
-            return True
-        return False
-
     @staticmethod
-    def get_enemy_positions(board):
+    def get_enemy_positions(board: list[list]) -> list:
+        """
+        Returns a list of all enemy positions on the board for the minimax function
+        :param board: A representation of the game board.
+        :return: A list of all enemy positions
+        """
         enemy = []
         for i in range(len(board)):
             for j in range(len(board[0])):
@@ -126,7 +174,12 @@ class ThreeMusketeers:
         return enemy
 
     @staticmethod
-    def get_musk_positions(board):
+    def get_musk_positions(board: list[list]) -> list:
+        """
+        Returns a list of all musketeer positions on the board for the minimax function
+        :param board: A representation of the game board.
+        :return: A list of all musketeer positions
+        """
         pos = []
         for i in range(len(board)):
             for j in range(len(board[0])):
@@ -135,7 +188,13 @@ class ThreeMusketeers:
         return pos
 
     @staticmethod
-    def count_available_squares(board, is_musketeer):
+    def count_available_squares(board: list[list], is_musketeer: bool) -> int:
+        """
+        Counts the number of available/empty squares for the minimax function
+        :param board: A representation of the game board.
+        :param is_musketeer: Bool to indicate if the character is a musketeer or not
+        :return: Count of available squares
+        """
         empty = []
         if is_musketeer:
             offsets = [(0, -1), (1, 0), (-1, 0), (0, 1)]
@@ -153,7 +212,12 @@ class ThreeMusketeers:
                         empty.append((i, j))
         return len(empty)
 
-    def calculate_average_distance(self, board):
+    def calculate_average_distance(self, board: list[list]) -> int:
+        """
+        Calculates the distance between the musketeers and the enemy for the minimax function
+        :param board: A representation of the game board.
+        :return: Sum of distance to all the enemy
+        """
         enemy_proximity = 0
         for enemy in self.get_enemy_positions(board):  # Get positions of all enemy pieces
             for musketeer in self.get_musk_positions(board):
@@ -161,23 +225,24 @@ class ThreeMusketeers:
                 enemy_proximity += distance
         return enemy_proximity
 
-    def count_musketeers_in_corners(self, board):
+    def count_musketeers_in_corners(self, board: list[list]) -> int:
+        """
+        Counts the number of musketeers in the corners of the board
+        :param board: A representation of the game board.
+        :return: Count of musketeers in the corners of the board
+        """
         corner_score = 0
         for musketeer in self.get_musk_positions(board):
             if musketeer in [(0, 0), (4, 0), (4, 4), (0, 4)]:
                 corner_score += 1
         return corner_score
 
-    def evaluate(self, board, is_musketeer):
+    def evaluate(self, board: list[list], is_musketeer: bool) -> int:
         """
         Heuristic evaluation function for Three Musketeers considering refined factors.
-
-        Args:
-            board: A representation of the game board.
-            is_musketeer: Boolean indicating if evaluating for Musketeers (True) or Enemies (False).
-
-        Returns:
-            A score representing the board state's favorability for the given player.
+        :param board: A representation of the game board.
+        :param is_musketeer: Boolean indicating if evaluating for Musketeers (True) or Enemies (False).
+        :return: A score representing the board state's favourability for the given player.
         """
         if is_musketeer:
             enemy_count = len(self.get_enemy_positions(board))  # Count Enemies
@@ -195,8 +260,17 @@ class ThreeMusketeers:
 
             return enemy_count * -2 + enemy_adjacent_squares - empty_adjacent_penalty
 
+    # noinspection PyTypeChecker
     @staticmethod
-    def make_minimax_move(board, pos, move, is_musketeer):
+    def make_minimax_move(board: list[list], pos: tuple, move: tuple, is_musketeer: bool) -> list[list]:
+        """
+        Make a move on the minimax board and return the new board
+        :param board: A representation of the game board.
+        :param pos: Source cell
+        :param move: Destination cell
+        :param is_musketeer: Boolean indicating if evaluating for Musketeers (True) or Enemies (False).
+        :return: Updated board
+        """
         if is_musketeer:
             pass
             # replace move with 'M'
@@ -210,7 +284,13 @@ class ThreeMusketeers:
             board[move[0]][move[1]] = ' '
         return board
 
-    def generate_valid_moves_minimax(self, board, player):
+    def generate_valid_moves_minimax(self, board: list[list], player: str) -> dict:
+        """
+        Function to generate valid moves for the given player within the minimax function.
+        :param board: A representation of the game board.
+        :param player: 'M' or 'E' for musketeer or enemy respectively.
+        :return: a dictionary of the valid moves for the given player.
+        """
         moves = defaultdict(lambda: [])
         offsets = [(0, -1), (1, 0), (-1, 0), (0, 1)]
         if player:
@@ -229,19 +309,16 @@ class ThreeMusketeers:
                                     moves[(i, j)].append((i + offset[0], j + offset[1]))
         return moves
 
-    def minimax(self, board, depth, is_musketeer, alpha=float('-inf'), beta=float('inf')):
+    def minimax(self, board: list[list], depth: int, is_musketeer: bool,
+                alpha: float = float('-inf'), beta: float = float('inf')):
         """
         Minimax function with player-specific heuristic for Three Musketeers.
-
-        Args:
-            board: A representation of the game board.
-            depth: Current depth in the search tree.
-            alpha: Alpha value for alpha-beta pruning.
-            beta: Beta value for alpha-beta pruning.
-            is_musketeer: Boolean indicating if calculating for Musketeers (True) or Enemies (False).
-
-        Returns:
-            A tuple containing the best score and the corresponding move.
+        :param board: A representation of the game board.
+        :param depth: Current depth in the search tree.
+        :param is_musketeer: Boolean indicating if calculating for Musketeers (True) or Enemies (False).
+        :param alpha: Alpha value for alpha-beta pruning.
+        :param beta: Beta value for alpha-beta pruning.
+        :return: A tuple containing the best score and the corresponding move.
         """
         # Check for terminal state (win or draw)
         if not self.are_moves_available(board):

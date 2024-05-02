@@ -10,10 +10,10 @@ class ThreeMusketeersGPU:
         self.difficulty = diff * 2
         self.player = 'M'
         self.board = [['W', 'S', 'S', 'S', 'M'],
-                                   ['S', 'S', 'S', 'S', 'S'],
-                                   ['S', 'S', 'M', 'S', 'S'],
-                                   ['S', 'S', 'S', 'S', 'S'],
-                                   ['M', 'S', 'S', 'S', 'S']]
+                       ['S', 'S', 'S', 'S', 'S'],
+                       ['S', 'S', 'M', 'S', 'S'],
+                       ['S', 'S', 'S', 'S', 'S'],
+                       ['M', 'S', 'S', 'S', 'S']]
         self.musketeers_position = defaultdict()
         self.winner = None
 
