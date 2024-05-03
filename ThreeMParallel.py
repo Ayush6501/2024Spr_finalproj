@@ -3,17 +3,17 @@ import concurrent.futures
 import torch
 
 
-class ThreeMusketeersGPU:
+class ThreeMusketeersParallel:
     def __init__(self, opp, diff):
 
         self.opponent = opp
         self.difficulty = diff * 2
         self.player = 'M'
         self.board = [['W', 'S', 'S', 'S', 'M'],
-                       ['S', 'S', 'S', 'S', 'S'],
-                       ['S', 'S', 'M', 'S', 'S'],
-                       ['S', 'S', 'S', 'S', 'S'],
-                       ['M', 'S', 'S', 'S', 'S']]
+                      ['S', 'S', 'S', 'S', 'S'],
+                      ['S', 'S', 'M', 'S', 'S'],
+                      ['S', 'S', 'S', 'S', 'S'],
+                      ['M', 'S', 'S', 'S', 'S']]
         self.musketeers_position = defaultdict()
         self.winner = None
 

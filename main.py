@@ -1,5 +1,5 @@
 from ThreeM import ThreeMusketeers
-from ThreeMParallel import ThreeMusketeersGPU
+from ThreeMParallel import ThreeMusketeersParallel
 import copy
 from art import *
 

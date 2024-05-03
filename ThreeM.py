@@ -96,14 +96,14 @@ class ThreeMusketeers:
                                     return True
             return False
 
-    def generate_valid_moves(self, player: str) -> dict:
+    def generate_valid_moves(self, player: bool) -> dict:
         """
         Generates the valid moves for the musketeers as well as the enemy
         :param player: Character to generate the moves for
         :return: Moves as a dict
         >>> game = ThreeMusketeers('M', 1)
         >>> game.get_musketeers()
-        >>> test_moves = game.generate_valid_moves('M')
+        >>> test_moves = game.generate_valid_moves(True)
         >>> test_moves.keys()
         dict_keys([1, 2, 3])
         """
