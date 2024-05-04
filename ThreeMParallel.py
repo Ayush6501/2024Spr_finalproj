@@ -1,64 +1,90 @@
 from collections import defaultdict
 import concurrent.futures
-import torch
+import numpy as np
 
 
 class ThreeMusketeersParallel:
-    def __init__(self, opp, diff):
-
+    def __init__(self, opp: str, diff: int):
         self.opponent = opp
         self.difficulty = diff * 2
         self.player = 'M'
-        self.board = [['W', 'S', 'S', 'S', 'M'],
-                      ['S', 'S', 'S', 'S', 'S'],
-                      ['S', 'S', 'M', 'S', 'S'],
-                      ['S', 'S', 'S', 'S', 'S'],
-                      ['M', 'S', 'S', 'S', 'S']]
+        self.board = np.array([['W', 'S', 'S', 'S', 'M'],
+                               ['S', 'S', 'S', 'S', 'S'],
+                               ['S', 'S', 'M', 'S', 'S'],
+                               ['S', 'S', 'S', 'S', 'S'],
+                               ['M', 'S', 'S', 'S', 'S']])
         self.musketeers_position = defaultdict()
         self.winner = None
 
-    def print_board(self):
-        c = 0
+    def print_board(self) -> None:
+        """
+        Prints the game board
+        :return: None
+        """
         print()
         print('    0|   1|   2|   3|   4')
-        for row in self.board:
-            print(str(c) + ' ' + str(row))
-            c += 1
+        for i, row in enumerate(self.board):
+            print(f"{i} {row}")
         print()
-        return
 
     def get_musketeers(self):
+        """
+        Returns the musketeer's position on the board
+        Time Complexity: O(N), where N is the size of the board
+        :return: None
+        >>> game = ThreeMusketeersParallel('M', 1)
+        >>> game.get_musketeers()
+        >>> print(game.musketeers_position)
+        defaultdict(None, {1: (0, 4), 2: (2, 2), 3: (4, 0)})
+        """
         num = 1
         for i in range(len(self.board)):
             for j in range(len(self.board[0])):
-                if self.board[i][j] == 'M':
+                if self.board[i, j] == 'M':
                     self.musketeers_position[num] = (i, j)
                     num += 1
 
-    def is_winner(self):
-        pass
-
     def are_moves_available(self, board=None):
+        """
+        Checks if the board has any available moves for the musketeers
+        :param board: if None the class board will be checked, else the dummy board will be checked (minimax)
+        :return: True if moves are available, else False
+        >>> game = ThreeMusketeersParallel('M', 1)
+        >>> game.get_musketeers()
+        >>> game.are_moves_available()
+        True
+        """
         offsets = [(0, -1), (1, 0), (-1, 0), (0, 1)]
         if board is None:
             for _, musketeer in self.musketeers_position.items():
                 musk = musketeer
                 for offset in offsets:
                     if 0 <= musk[0] + offset[0] < 5 and 0 <= musk[1] + offset[1] < 5:
-                        if self.board[musk[0] + offset[0]][musk[1] + offset[1]] != ' ':
+                        if self.board[musk[0] + offset[0], musk[1] + offset[1]] != ' ':
                             return True
             return False
         else:
             for i in range(len(board)):
                 for j in range(len(board[0])):
-                    if board[i][j] == 'M':
+                    if board[i, j] == 'M':
                         for offset in offsets:
                             if 0 <= i + offset[0] < 5 and 0 <= j + offset[1] < 5:
-                                if board[i + offset[0]][j + offset[1]] != ' ':
+                                if board[i + offset[0], j + offset[1]] != ' ':
                                     return True
             return False
 
     def generate_valid_moves(self, player):
+        """
+        Generates the valid moves for the musketeers as well as the enemy
+        Time Complexity: O(N), N is the size of the board
+        :param player: Character to generate the moves for
+        :return: Moves as a dict
+        >>> game = ThreeMusketeersParallel('M', 1)
+        >>> game.get_musketeers()
+        >>> test_moves = game.generate_valid_moves(True)
+        >>> test_moves.keys()
+        dict_keys([1, 2, 3])
+        """
         moves = defaultdict(lambda: [])
         offsets = [(0, -1), (1, 0), (-1, 0), (0, 1)]
         if player:
@@ -66,19 +92,27 @@ class ThreeMusketeersParallel:
                 pos = move
                 for offset in offsets:
                     if 0 <= pos[0] + offset[0] < 5 and 0 <= pos[1] + offset[1] < 5:
-                        if self.board[pos[0] + offset[0]][pos[1] + offset[1]] in ['S', 'W']:
+                        if self.board[pos[0] + offset[0], pos[1] + offset[1]] in ['S', 'W']:
                             moves[musketeer].append((pos[0] + offset[0], pos[1] + offset[1]))
         else:
             for i in range(len(self.board)):
                 for j in range(len(self.board[0])):
-                    if self.board[i][j] == ' ':
+                    if self.board[i, j] == ' ':
                         for offset in offsets:
                             if 0 <= i + offset[0] < 5 and 0 <= j + offset[1] < 5:
-                                if self.board[i + offset[0]][j + offset[1]] not in ['M', ' ']:
+                                if self.board[i + offset[0], j + offset[1]] not in ['M', ' ']:
                                     moves[(i, j)].append((i + offset[0], j + offset[1]))
         return moves
 
     def make_move(self, src, dest, index, is_musketeer):
+        """
+        Makes a move on the board for both the characters
+        :param src: Source cell
+        :param dest: Destination cell
+        :param index: helper to change the index of the musketeer in the musketeers position dict
+        :param is_musketeer: Boolean value to indicate if the character is a musketeer or not
+        :return: None
+        """
         if is_musketeer:
             self.board[dest[0]][dest[1]] = 'M'
             self.board[src[0]][src

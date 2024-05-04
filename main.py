@@ -2,6 +2,7 @@ from ThreeM import ThreeMusketeers
 from ThreeMParallel import ThreeMusketeersParallel
 import copy
 from art import *
+import time
 
 
 def select_difficulty() -> int:
@@ -37,7 +38,7 @@ def three_musketeers(char: str, diff: int) -> None:
     >>> three_musketeers(char='C', diff=3)
     Invalid input. You can only play as Enemy or Musketeer
     """
-    game = ThreeMusketeers(char, diff)
+    game = ThreeMusketeersParallel(char, diff)
     game.get_musketeers()
     player = True
 
@@ -63,7 +64,9 @@ def three_musketeers(char: str, diff: int) -> None:
                 # for space, move in moves.items():
                 #     print('Space {}: {}'.format(space, move))
                 board = copy.deepcopy(game.board)
+                start_time = time.time()
                 a, b = game.minimax(board, game.difficulty, False)
+                print("--- %s seconds ---" % (time.time() - start_time))
                 if b is None:
                     break
                 print('AI moves: {} to {}'.format(b[0], b[1]))

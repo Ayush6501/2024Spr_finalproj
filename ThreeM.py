@@ -5,7 +5,7 @@ class ThreeMusketeers:
     """
     ThreeMusketeers Puzzle Workhorse class to implement all the moves and checks
     """
-    def __init__(self, opp, diff):
+    def __init__(self, opp: str, diff: int):
         self.user = opp     # The user's character, either musketeer or enemy
         self.difficulty = diff * 2      # The depth of the tree
         self.player = 'M'       # Player with the first move
@@ -14,12 +14,12 @@ class ThreeMusketeers:
                       ['S', 'S', 'M', 'S', 'S'],
                       ['S', 'S', 'S', 'S', 'S'],
                       ['M', 'S', 'S', 'S', 'S']]
-        self.debug_board = [['W', ' ', 'S', 'S', 'M'],          # A board to help with debugging
+        self.debug_board = [['W', ' ', 'S', 'S', 'M'],  # A board to help with debugging
                             ['S', ' ', 'S', ' ', 'S'],
                             ['S', ' ', 'M', ' ', ' '],
                             ['S', ' ', 'S', ' ', 'S'],
                             ['M', 'S', 'S', ' ', ' ']]
-        self.lost_board = [['W', ' ', 'M', '', ' '],  # A board to help with debugging
+        self.lost_board = [['W', ' ', 'M', '', ' '],    # Another board to help with debugging
                            ['S', ' ', ' ', ' ', 'S'],
                            [' ', ' ', 'M', ' ', ' '],
                            [' ', ' ', 'S', ' ', 'S'],
@@ -54,6 +54,7 @@ class ThreeMusketeers:
     def get_musketeers(self) -> None:
         """
         Returns the musketeer's position on the board
+        Time Complexity: O(N), where N is the size of the board
         :return: None
         >>> game = ThreeMusketeers('M', 1)
         >>> game.get_musketeers()
@@ -99,6 +100,7 @@ class ThreeMusketeers:
     def generate_valid_moves(self, player: bool) -> dict:
         """
         Generates the valid moves for the musketeers as well as the enemy
+        Time Complexity: O(N), N is the size of the board
         :param player: Character to generate the moves for
         :return: Moves as a dict
         >>> game = ThreeMusketeers('M', 1)
@@ -173,6 +175,7 @@ class ThreeMusketeers:
     def did_enemy_win(self) -> bool:
         """
         Checks if the enemy wins the game i.e., the musketeers have no available moves
+        Time Complexity: O(1)
         :return: True if enemy wins, else False
         >>> game = ThreeMusketeers('M', 1)
         >>> game.get_musketeers()
@@ -362,6 +365,7 @@ class ThreeMusketeers:
                 alpha: float = float('-inf'), beta: float = float('inf')) -> tuple:
         """
         Minimax function with player-specific heuristic for Three Musketeers.
+        Time Complexity: O(m^depth), where m is the number of valid moves.
         :param board: A representation of the game board.
         :param depth: Current depth in the search tree.
         :param is_musketeer: Boolean indicating if calculating for Musketeers (True) or Enemies (False).
